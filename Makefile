@@ -1,16 +1,36 @@
 GIT_REF := $(shell git rev-parse --short=7 HEAD)
-SERVICE_NAME := $(shell grep "^module" go.mod | rev | cut -d "/" -f1 | rev)
 VERSION ?= $(GIT_REF)
-VERSION_ADMIN ?= $(GIT_REF)
-SERVICE_NAME_ADMIN := $(SERVICE_NAME)_admin
-DOCKER_FILE_ADMIN := "docker/admin/Dockerfile"
-ADMIN_REGISTRY := 083947760274.dkr.ecr.ap-south-1.amazonaws.com/density-admin
+DOCKER_FILE_ADMIN := "Dockerfile"
+ADMIN_REGISTRY := 083947760274.dkr.ecr.ap-south-1.amazonaws.com/admin-frontend
 ADMIN_IMAGE := $(ADMIN_REGISTRY):$(VERSION)
+LATEST :=latest
+LATEST_IMAGE := $(ADMIN_REGISTRY):$(LATEST)
+
+
+.PHONY: dependencies
+dependencies:
+	npm install
 
 .PHONY: admin-container
 admin-container:
-    @docker build --platform=linux/amd64 -t $(ADMIN_IMAGE) \
-           --build-arg VERSION=$(VERSION_ADMIN) \
-           --build-arg SERVICE_NAME=$(SERVICE_NAME_ADMIN) \
-           -f $(DOCKER_FILE_ADMIN) \
-           .
+	@docker build --platform=linux/amd64 -t $(ADMIN_IMAGE) \
+			--build-arg BUILD_TYPE=$(BUILD_TYPE) \
+			-f $(DOCKER_FILE_ADMIN) \
+			.
+
+.PHONY: get-ecr-credentials
+get-ecr-credentials:
+	aws ecr get-login-password --region ap-south-1 | docker login --username AWS --password-stdin  083947760274.dkr.ecr.ap-south-1.amazonaws.com
+
+.PHONY: docker-push-admin
+docker-push-admin:
+	docker push $(ADMIN_IMAGE)
+	docker tag $(ADMIN_IMAGE) $(LATEST_IMAGE)
+	docker push $(LATEST_IMAGE)
+
+docker-run-local:
+	docker run -p 3000:80 $(IMAGE)
+
+.PHONY:run-https
+run-https :
+	HTTPS=true SSL_CRT_FILE=./.cert/cert.pem SSL_KEY_FILE=./.cert/key.pem react-scripts start
