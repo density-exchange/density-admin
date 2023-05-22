@@ -202,6 +202,8 @@ export default function DepositRecords() {
 	const [transactionHistoryModal, setTransactionHistoryModal] = useState(false);
 	const toggleViewTransactionModal = () => setTransactionHistoryModal(!transactionHistoryModal);
 
+	const [isEditAllowed, setIsEditAllowed] = useState(false);
+
 	const [remark, setRemark] = useState('');
 	const [remarkModal, setRemarkModal] = useState(false);
 	const toggleRemarkModal = () => setRemarkModal(!remarkModal);
@@ -292,13 +294,14 @@ export default function DepositRecords() {
 			width: 150,
 			renderCell: (params) => {
 				return (
-					<Box sx={{ display: "flex", alignItems: "center", justifyItems: "center" }}>
-        		<Typography variant="Regular_14" sx={{ width: "100%", textOverflow: "ellipsis", overflow: "hidden" }}>
-						{`****${params.row?.bankAccNo?.slice(-4)}`}</Typography>
-        		<CopyButton copyText={params.row?.bankAccNo}/>
-      		</Box>
-				)
-			}
+					<Box sx={{ display: 'flex', alignItems: 'center', justifyItems: 'center' }}>
+						<Typography variant="Regular_14" sx={{ width: '100%', textOverflow: 'ellipsis', overflow: 'hidden' }}>
+							{`****${params.row?.bankAccNo?.slice(-4)}`}
+						</Typography>
+						<CopyButton copyText={params.row?.bankAccNo} />
+					</Box>
+				);
+			},
 		},
 		{
 			field: 'depositAmount',
@@ -399,6 +402,9 @@ export default function DepositRecords() {
 			},
 		},
 	];
+
+	const filteredDepositColumns = columns.filter((column) => column.field !== 'approve' && column.field !== 'reject');
+
 	const transactionColumns = [
 		{
 			field: 'date',
@@ -451,6 +457,26 @@ export default function DepositRecords() {
 		setDepositPaginationModal({ page: event.page, pageSize: event.pageSize });
 	};
 
+	const fetchUserRole = useCallback(() => {
+		makeGetReq(`v1/admin/${adminID}`)
+			.then((role) => {
+				setIsEditAllowed(role.IsSuperAdmin);
+			})
+			.catch((error) => {
+				// Handle the error here
+			});
+	});
+
+	const fetchUserAction = useCallback(() => {
+		makeGetReq(`v1/check-action?id=${adminID}&action=RewardUpdater`)
+			.then((action) => {
+				setIsEditAllowed(action.isActionAllowed);
+			})
+			.catch((error) => {
+				// Handle the error here
+			});
+	});
+
 	const fetchAllFiatTxnMobile = useCallback(async () => {
 		const { data, total, pageID, nextPageID } = await makeGetReq(
 			`v1/fiat/query-fiat-transaction?type=INR_DEPOSIT&size=${mobilePaginationModal.pageSize}&start=${
@@ -486,7 +512,6 @@ export default function DepositRecords() {
 			}&status=STARTED`
 		);
 
-		// console.log(data);
 		const rows = data?.map((traxn) => ({
 			id: traxn.id,
 			userName: traxn.userFirstName && traxn.userLastName ? traxn.userFirstName + ' ' + traxn.userLastName : '---',
@@ -524,7 +549,6 @@ export default function DepositRecords() {
 		const { data, total } = await makeGetReq(
 			`v1/admin-logs?actionType=FIAT&size=${depositPaginationModal.pageSize}&pageNo=${depositPaginationModal.page + 1}`
 		);
-		// console.log(data);
 		const rows = data.map((log) => ({
 			id: log.logID,
 			admin: log.adminName,
@@ -535,7 +559,6 @@ export default function DepositRecords() {
 			remarks: log.action.log.Remarks?.join(' '),
 			amount: log.action.log.Amount,
 		}));
-		// console.log(rows);
 		setDepositRows(rows);
 		setTotalDepositLogRows(total);
 	}, [depositPaginationModal.page, depositPaginationModal.pageSize]);
@@ -563,7 +586,7 @@ export default function DepositRecords() {
 	}, [mobileLogPaginationModal.page, mobileLogPaginationModal.pageSize]);
 
 	const getFiatTraxnById = async (userId) => {
-		if(!userId) return;
+		if (!userId) return;
 
 		const { data } = await makeGetReq(`v1/fiat/query-fiat-transaction?userID=${userId}&type=INR_DEPOSIT`);
 		const rows = data.map((traxn) => ({
@@ -580,7 +603,7 @@ export default function DepositRecords() {
 	};
 
 	const getFiatTraxnByIdMobile = useCallback(async () => {
-		if(!fiatTraxnUserID) return;
+		if (!fiatTraxnUserID) return;
 
 		const { data, total, pageID, nextPageID } = await makeGetReq(
 			`v1/fiat/query-fiat-transaction?userID=${fiatTraxnUserID}&type=INR_DEPOSIT&size=${
@@ -638,8 +661,6 @@ export default function DepositRecords() {
 		return str + refNo.slice(-3);
 	};
 
-	console.log(fiatTraxns);
-
 	useEffect(() => {
 		fetchAllFiatTxnMobile();
 	}, [fetchAllFiatTxnMobile]);
@@ -674,7 +695,7 @@ export default function DepositRecords() {
 
 			{isMobile ? (
 				<>
-					<Box sx={{ height: "420px", width: '100%', p: 1 }}>
+					<Box sx={{ height: '420px', width: '100%', p: 1 }}>
 						<DataGrid
 							sx={{
 								'.MuiDataGrid-columnHeaderCheckbox': {
@@ -693,7 +714,7 @@ export default function DepositRecords() {
 								boxShadow: 5,
 							}}
 							rows={isMobile ? fiatTraxns : AccordionRows}
-							columns={isMobile ? columns : mobileDepositColumns}
+							columns={isMobile ? (isEditAllowed ? columns : filteredDepositColumns) : mobileDepositColumns}
 							paginationModel={paginationModal}
 							rowCount={totalRows}
 							pageSizeOptions={[5, 10]}
@@ -708,7 +729,7 @@ export default function DepositRecords() {
 						<Typography variant="h2">Deposit Logs</Typography>
 					</Box>
 					<Box display="flex" justifyContent="center">
-						<Box sx={{ height: "420px", width: '100%', p: 1 }}>
+						<Box sx={{ height: '420px', width: '100%', p: 1 }}>
 							<DataGrid
 								sx={{
 									'.MuiDataGrid-columnHeaderCheckbox': {

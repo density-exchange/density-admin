@@ -67,7 +67,6 @@ export default function Dashboard() {
 
 	const getCurrentUser = async () => {
 		const currentUser = await makeGetReq(`/v1/admin/${adminID}`);
-		console.log('ladsfjakl', currentUser);
 		dispatch(getCurrentUserInfo(currentUser));
 	};
 
