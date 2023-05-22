@@ -14,7 +14,10 @@ import {
 	ToggleButtonGroup,
 	Typography,
 	useMediaQuery,
+	Tooltip
 } from '@mui/material';
+import ContentCopyIcon from "@mui/icons-material/ContentCopy";
+import CopyButton from './Common/CopyButton';
 import React, { useCallback, useEffect, useState } from 'react';
 import { makeGetReq, makePostReq } from '../utils/axiosHelper';
 import { useSessionContext } from 'supertokens-auth-react/recipe/session';
@@ -227,6 +230,7 @@ export default function WithDraw() {
 		pageSize: 5,
 	});
 
+
 	const [totalDepositLogRows, setTotalDepositLogRows] = useState(0);
 
 	const [fiatTraxns, setFiatTraxns] = useState([]);
@@ -241,7 +245,7 @@ export default function WithDraw() {
 	const [remark, setRemark] = useState('');
 	const [remarkModal, setRemarkModal] = useState(false);
 	const toggleRemarkModal = () => setRemarkModal(!remarkModal);
-
+	
 	const depositLogs = [
 		{
 			field: 'timestamp',
@@ -332,7 +336,31 @@ export default function WithDraw() {
 			cellClassName: 'kyc-row-style',
 			headerName: 'Bank Account No',
 			headerClassName: 'kyc-column-header',
-			width: 150,
+			width: 100,
+			renderCell: (params) => {
+				return (
+					<Box sx={{ display: "flex", alignItems: "center", justifyItems: "center" }}>
+        		<Typography variant="Regular_14" sx={{ width: "100%", textOverflow: "ellipsis", overflow: "hidden" }}>
+						{`****${params.row?.bankAccNo?.slice(-4)}`}</Typography>
+        		<CopyButton copyText={params.row?.bankAccNo}/>
+      		</Box>
+				)
+			}
+		},
+		{
+			field: "ifsc",
+			headerName: "IFSC",
+			headerClassName: "kyc-column-header",
+			width: 100,
+			renderCell: (params) => {
+				return (
+					<Box sx={{ display: "flex", alignItems: "center", justifyItems: "center" }}>
+        		<Typography variant="Regular_14" sx={{ width: "100%", textOverflow: "ellipsis", overflow: "hidden" }}>
+						{`****${params.row?.ifsc?.slice(-4)}`}</Typography>
+        		<CopyButton copyText={params.row?.ifsc}/>
+      		</Box>
+				)
+			}
 		},
 		{
 			field: 'withdrawAmount',
@@ -342,11 +370,11 @@ export default function WithDraw() {
 			width: 100,
 		},
 		{
-			field: 'redactedRefID',
+			field: 'RefID',
 			headerName: 'Reference Number',
 			cellClassName: 'kyc-row-style',
 			headerClassName: 'kyc-column-header',
-			width: 100,
+			width: 200,
 		},
 		{
 			field: 'withdrawStatus',
@@ -361,7 +389,7 @@ export default function WithDraw() {
 			field: 'viewDetails',
 			headerName: 'View Details',
 			headerClassName: 'kyc-column-header',
-			width: 200,
+			width: 150,
 			renderCell: (params) => {
 				return (
 					<>
@@ -371,7 +399,7 @@ export default function WithDraw() {
 								await getFiatTraxnById(params.row.UserID);
 							}}
 						>
-							Transaction History
+							Trxn History
 						</ViewButton>
 					</>
 				);
@@ -479,9 +507,10 @@ export default function WithDraw() {
 	};
 
 	const fetchUserRole = useCallback(async () => {
+		if(!adminID) return;
 		const role = await makeGetReq(`v1/admin/${adminID}`);
-		console.log('helllllasfd', role.IsSuperAdmin);
-	});
+		// console.log('helllllasfd', role.IsSuperAdmin);
+	},[adminID]);
 
 	const fetchUserAction = useCallback(() => {
 		makeGetReq(`v1/check-action?id=${adminID}&action=RewardUpdater`)
@@ -510,10 +539,11 @@ export default function WithDraw() {
 			date: new Date(traxn.createdAt).toLocaleDateString(),
 			time: new Date(traxn.createdAt).toLocaleTimeString(),
 			FiatTxnID: traxn.txnID,
-			RefID: traxn.txnRefID,
+			RefID: traxn.txnRefID !== "" ? traxn.txnRefID : "--",
 			redactedRefID: redactString(traxn.txnRefID),
 			UserID: traxn.userID,
 			TraxnType: traxn.fiatTransactionType,
+			ifsc: traxn?.IFSC
 		}));
 
 		setFiatTraxns(rows);
@@ -536,7 +566,7 @@ export default function WithDraw() {
 			date: new Date(traxn.createdAt).toLocaleDateString(),
 			time: new Date(traxn.createdAt).toLocaleTimeString(),
 			FiatTxnID: traxn.txnID,
-			RefID: traxn.txnRefID,
+			RefID: traxn.txnRefID !== "" ? traxn.txnRefID : "--",
 			redactedRefID: redactString(traxn.txnRefID),
 			UserID: traxn.userID,
 			TraxnType: traxn.fiatTransactionType,
@@ -588,6 +618,7 @@ export default function WithDraw() {
 	}, [mobileLogPaginationModal.page, mobileLogPaginationModal.pageSize]);
 
 	const getFiatTraxnByIdMobile = useCallback(async () => {
+		if(!fiatTraxnUserID) return;
 		const { data, total, pageID, nextPageID } = await makeGetReq(
 			`v1/fiat/query-fiat-transaction?userID=${fiatTraxnUserID}&type=INR_WITHDRAWAL&size=${
 				mobileFiatTraxnByIdModal.pageSize
@@ -601,7 +632,7 @@ export default function WithDraw() {
 			time: new Date(traxn.createdAt).toLocaleTimeString(),
 			withdrawlAmount: Math.abs(traxn.amount),
 			withdrawlStatus: traxn.fiatTransactionStatus,
-			RefID: traxn.txnRefID,
+			RefID: traxn.txnRefID !== "" ? traxn.txnRefID : "--",
 		}));
 		setTraxnHistoryAccordionRows(rows);
 		setTotalTraxnHistory(total);
@@ -609,7 +640,9 @@ export default function WithDraw() {
 		setTraxnHistoryNextPageID(nextPageID);
 	}, [mobileFiatTraxnByIdModal.page, mobileFiatTraxnByIdModal.pageSize, fiatTraxnUserID]);
 
+
 	const getFiatTraxnById = async (userId) => {
+		if(!userId) return;
 		const { data } = await makeGetReq(`v1/fiat/query-fiat-transaction?userID=${userId}&type=INR_WITHDRAWAL`);
 		const rows = data.map((traxn) => ({
 			id: traxn.id,
@@ -618,10 +651,12 @@ export default function WithDraw() {
 			date: new Date(traxn.createdAt).toLocaleDateString(),
 			time: new Date(traxn.createdAt).toLocaleTimeString(),
 			withdrawlAmount: Math.abs(traxn.amount),
-			RefID: traxn.txnRefID,
+			RefID: traxn.txnRefID ?  traxn.txnRefID :   "--",
+			withdrawlStatus: traxn?.fiatTransactionStatus
 		}));
 		setFiatTraxnHistoryRows(rows);
 	};
+
 	const processTraxn = async (UserID, action, RefID, FiatTxnID, Amount, Remark, ActionType) => {
 		try {
 			const res = await makePostReq(`v1/fiat/transaction/${UserID}/processTransaction`, {
@@ -646,7 +681,8 @@ export default function WithDraw() {
 			setRemark('');
 			setTxnRefId('');
 			// console.log(err.response?.data.ErrorMessage);
-			setMessage(err.response.data.ErrorMessage);
+			setMessage("Request failed. Check Ref. ID");
+
 			await fetchAllFiatTxn();
 			await fetchAllFiatTxnMobile();
 		}
@@ -726,7 +762,7 @@ export default function WithDraw() {
 
 			{isMobile ? (
 				<>
-					<Box sx={{ height: 650, width: '100%' }}>
+					<Box sx={{ height: "400px", width: '100%' }}>
 						<DataGrid
 							sx={{
 								'.MuiDataGrid-columnHeaderCheckbox': {
@@ -760,7 +796,7 @@ export default function WithDraw() {
 						<Typography variant="h2">Withdraw Logs</Typography>
 					</Box>
 					<Box display="flex" justifyContent="center">
-						<Box sx={{ height: 650, width: '100%' }}>
+						<Box sx={{ height: "400px", width: '100%' }}>
 							<DataGrid
 								sx={{
 									'.MuiDataGrid-columnHeaderCheckbox': {
@@ -965,6 +1001,7 @@ export default function WithDraw() {
 								'& .MuiDataGrid-cellCheckbox': {
 									display: 'none',
 								},
+								height: "400px"
 							}}
 							rows={fiatTraxnHistoryRows}
 							columns={transactionColumns}

@@ -6,6 +6,8 @@
 .kyc-row-style {
 	font-size: 15px;
 	font-weight: bold;
+	display: flex;
+	justify-content: center\;
 }
 
 /* reward screen styles */

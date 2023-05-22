@@ -323,7 +323,17 @@ export default function AdminUsersTable() {
 		superAdmin: admin.IsSuperAdmin,
 		role: admin.Roles,
 	}));
-
+	const getStyles = (paramID, containerArray) =>  {
+		console.log("role Id", paramID);
+		const isSelected = containerArray.indexOf(paramID) === -1;
+		if(isSelected) return {};
+		return {
+			fontWeight: "500",
+			backgroundColor: "#0288D1",
+			color: "#fff"
+		};
+	}
+	console.log("permissions", permissionsToRole);
 	useEffect(() => {
 		getAllAdmins();
 		// getRolesPermissions();
@@ -350,13 +360,13 @@ export default function AdminUsersTable() {
 	return (
 		<Box sx={{ backgroundColor: '#EFF6FF' }}>
 			<Box sx={{ padding: '10px' }}>
-				<Box display="flex" justifyContent="space-between" mb={1}>
+				<Box display="flex" justifyContent="center" gap={8} mb={1}>
 					<Button onClick={toggleAddAdminModal} variant="contained">
 						Create an admin
 					</Button>
-					<Button onClick={toggleAddPermissionModal} variant="contained">
+					{/* <Button onClick={toggleAddPermissionModal} variant="contained">
 						Create a permission
-					</Button>
+					</Button> */}
 					<Button variant="contained" onClick={toggleAddRoleModal}>
 						Create a role
 					</Button>
@@ -531,6 +541,8 @@ export default function AdminUsersTable() {
 								<MenuItem value="AdminLogViewer">AdminLogViewer</MenuItem>
 								<MenuItem value="RewardUpdater">RewardUpdater</MenuItem>
 								<MenuItem value="AppVersionUpdater">AppVersionUpdater</MenuItem>
+								<MenuItem value="FiatViewer">FiatViewer</MenuItem>
+
 							</Select>
 						</FormControl>
 					</Box>
@@ -553,7 +565,7 @@ export default function AdminUsersTable() {
 								<InputLabel>Permissions</InputLabel>
 								<Select multiple value={permissionsToRole} onChange={(e) => setPermissionsToRole(e.target.value)}>
 									{createdPermissions?.map((perm) => (
-										<MenuItem key={perm.ID} value={perm.ID}>
+										<MenuItem key={perm.ID} value={perm.ID} style={getStyles(perm.ID, permissionsToRole)}>
 											{perm.Permission}
 										</MenuItem>
 									))}
@@ -584,7 +596,7 @@ export default function AdminUsersTable() {
 							<InputLabel>Roles</InputLabel>
 							<Select multiple value={rolesToAdmin} onChange={(e) => setRolesToAdmin(e.target.value)}>
 								{createdRoles?.map((role) => (
-									<MenuItem key={role.ID} value={role.ID}>
+									<MenuItem key={role.ID} value={role.ID} style={getStyles(role.ID, rolesToAdmin)} >
 										{role.Role}
 									</MenuItem>
 								))}

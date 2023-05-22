@@ -4,8 +4,8 @@ import { Box, Button, IconButton, Modal, TextField, Typography, useMediaQuery } 
 import { DataGrid } from '@mui/x-data-grid';
 import { styled } from '@mui/material/styles';
 // import axiosInstance from "../utils/axiosHelper";
-import { useDispatch } from 'react-redux';
-import { fetchUsers } from '../redux/kyc/users.slice';
+// import { useDispatch } from 'react-redux';
+// import { fetchUsers } from '../redux/kyc/users.slice';
 import { makeGetReq, makePatchReq, makePostReq } from '../utils/axiosHelper';
 import { useSessionContext } from 'supertokens-auth-react/recipe/session';
 import { DemoContainer } from '@mui/x-date-pickers/internals/demo';
@@ -13,6 +13,7 @@ import { AdapterDayjs } from '@mui/x-date-pickers/AdapterDayjs';
 import { LocalizationProvider } from '@mui/x-date-pickers/LocalizationProvider';
 import { DatePicker } from '@mui/x-date-pickers/DatePicker';
 import dayjs from 'dayjs';
+import CopyButton from './Common/CopyButton';
 import Accordion from '@mui/material/Accordion';
 import AccordionSummary from '@mui/material/AccordionSummary';
 import AccordionDetails from '@mui/material/AccordionDetails';
@@ -289,6 +290,15 @@ export default function DepositRecords() {
 			headerName: 'Bank Account No',
 			headerClassName: 'kyc-column-header',
 			width: 150,
+			renderCell: (params) => {
+				return (
+					<Box sx={{ display: "flex", alignItems: "center", justifyItems: "center" }}>
+        		<Typography variant="Regular_14" sx={{ width: "100%", textOverflow: "ellipsis", overflow: "hidden" }}>
+						{`****${params.row?.bankAccNo?.slice(-4)}`}</Typography>
+        		<CopyButton copyText={params.row?.bankAccNo}/>
+      		</Box>
+				)
+			}
 		},
 		{
 			field: 'depositAmount',
@@ -314,7 +324,7 @@ export default function DepositRecords() {
 			field: 'viewDetails',
 			headerName: 'View Details',
 			headerClassName: 'kyc-column-header',
-			width: 200,
+			width: 150,
 			renderCell: (params) => {
 				return (
 					<>
@@ -324,7 +334,7 @@ export default function DepositRecords() {
 								await getFiatTraxnById(params.row.UserID);
 							}}
 						>
-							Transaction History
+							Trxn History
 						</ViewButton>
 					</>
 				);
@@ -553,6 +563,8 @@ export default function DepositRecords() {
 	}, [mobileLogPaginationModal.page, mobileLogPaginationModal.pageSize]);
 
 	const getFiatTraxnById = async (userId) => {
+		if(!userId) return;
+
 		const { data } = await makeGetReq(`v1/fiat/query-fiat-transaction?userID=${userId}&type=INR_DEPOSIT`);
 		const rows = data.map((traxn) => ({
 			id: traxn.id,
@@ -568,6 +580,8 @@ export default function DepositRecords() {
 	};
 
 	const getFiatTraxnByIdMobile = useCallback(async () => {
+		if(!fiatTraxnUserID) return;
+
 		const { data, total, pageID, nextPageID } = await makeGetReq(
 			`v1/fiat/query-fiat-transaction?userID=${fiatTraxnUserID}&type=INR_DEPOSIT&size=${
 				mobileFiatTraxnByIdModal.pageSize
@@ -660,7 +674,7 @@ export default function DepositRecords() {
 
 			{isMobile ? (
 				<>
-					<Box sx={{ height: 620, width: '100%', p: 1 }}>
+					<Box sx={{ height: "420px", width: '100%', p: 1 }}>
 						<DataGrid
 							sx={{
 								'.MuiDataGrid-columnHeaderCheckbox': {
@@ -694,7 +708,7 @@ export default function DepositRecords() {
 						<Typography variant="h2">Deposit Logs</Typography>
 					</Box>
 					<Box display="flex" justifyContent="center">
-						<Box sx={{ height: 650, width: '100%', p: 1 }}>
+						<Box sx={{ height: "420px", width: '100%', p: 1 }}>
 							<DataGrid
 								sx={{
 									'.MuiDataGrid-columnHeaderCheckbox': {

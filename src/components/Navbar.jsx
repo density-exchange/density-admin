@@ -1,4 +1,4 @@
-import React, { useEffect } from 'react';
+import React, { useCallback, useEffect } from 'react';
 import { AppBar, Box, Toolbar, IconButton } from '@mui/material';
 import Menu from '@mui/material/Menu';
 import MenuItem from '@mui/material/MenuItem';
@@ -29,13 +29,14 @@ export default function Navbar() {
 
 	const { userId: adminID } = useSessionContext();
 
-	console.log('lasdfljs', adminID);
+	// console.log('lasdfljs', adminID);
 
-	const getCurrentUser = async () => {
+	const getCurrentUser = useCallback(async () => {
+		if(!adminID) return;
 		const currentUser = await makeGetReq(`/v1/admin/${adminID}`);
 		console.log('ladsfjakl', currentUser);
 		dispatch(getCurrentUserInfo(currentUser));
-	};
+	},[adminID]);
 
 	useEffect(() => {
 		getCurrentUser();

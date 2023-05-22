@@ -93,9 +93,9 @@ export default function Dashboard() {
 						alignItems="center"
 					>
 						<DashboardCards title="App Version" content={showAppVersion} backgroundColor="#D1E9FC" />
-						<DashboardCards title="Total Sign Up Users" content="197" backgroundColor="#FFF7CD" />
+						{/* <DashboardCards title="Total Sign Up Users" content="197" backgroundColor="#FFF7CD" />
 						<DashboardCards title="Total Success KYC" content="85" backgroundColor="#FFE7D9" />
-						<DashboardCards title="Total Pending KYC" content="46" backgroundColor="#FFF7CD" />
+						<DashboardCards title="Total Pending KYC" content="46" backgroundColor="#FFF7CD" /> */}
 					</Box>
 					<Box
 						display="flex"
@@ -103,9 +103,9 @@ export default function Dashboard() {
 						justifyContent="space-around"
 						alignItems="center"
 					>
-						<DashboardCards title="Total Failed KYC" content="46" backgroundColor="#D1E9FC" />
+						{/* <DashboardCards title="Total Failed KYC" content="46" backgroundColor="#D1E9FC" />
 						<DashboardCards title="Total Deposit Request" content="46" backgroundColor="#FFE7D9" />
-						<DashboardCards title="Total Withdraw Request" content="46" backgroundColor="#D1E9FC" />
+						<DashboardCards title="Total Withdraw Request" content="46" backgroundColor="#D1E9FC" /> */}
 					</Box>
 				</Box>
 			</BrowserView>

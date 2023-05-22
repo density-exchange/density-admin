@@ -352,18 +352,19 @@ export default function KycUsers() {
 			setRemark('');
 			setUserId(0);
 			setShowRemarkModal(false);
-		} else {
+		} else if (option === 'yes') {
 			if (remark === '') {
 				setErrorMessage(true);
 				setRemark('');
 			} else {
-				console.log(action, userId, remark);
+				// console.log(action, userId, remark);
 				const { message } = await updateKYVStatus({
 					action,
 					userID: userId,
 					remarks: remark,
 				});
 				if (message === 'OK') {
+					setShowRemarkModal(false);
 					navigate('/kycUsers');
 				} else {
 					alert('error');
@@ -373,10 +374,7 @@ export default function KycUsers() {
 				// 	userId,
 				// 	remarks: remark,
 				// });
-				updateKYVStatus(action, userId, remark);
-				setErrorMessage(false);
-				setRemark('');
-				setShowRemarkModal(false);
+				// updateKYVStatus(action, userId, remark);
 			}
 		}
 	};
@@ -393,7 +391,7 @@ export default function KycUsers() {
 		<Box sx={{ backgroundColor: '#EFF6FF' }}>
 			{isMobile ? (
 				<Box>
-					<Box sx={{ p: 2, height: 500, width: '100%' }}>
+					<Box sx={{ p: 2,height: "400px", width: '100%' }}>
 						<DataGrid
 							rows={[...userRows]}
 							columns={usersColumns}

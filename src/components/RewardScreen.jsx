@@ -224,7 +224,7 @@ export default function RewardScreen() {
         <Typography variant="h2" mt={3}>
           Reward History
         </Typography>
-        <Box sx={{ pt: 2, height: 650, width: "100%" }}>
+        <Box sx={{ pt: 2, height: "400px", width: "100%" }}>
           <DataGrid
             sx={{
               ".MuiDataGrid-columnHeaderCheckbox": {
