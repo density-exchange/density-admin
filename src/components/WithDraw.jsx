@@ -483,6 +483,16 @@ export default function WithDraw() {
 		console.log('helllllasfd', role.IsSuperAdmin);
 	});
 
+	const fetchUserAction = useCallback(() => {
+		makeGetReq(`v1/check-action?id=${adminID}&action=RewardUpdater`)
+			.then((role) => {
+				console.log('helllllasfd', role);
+			})
+			.catch((error) => {
+				// Handle the error here
+			});
+	});
+
 	const fetchAllFiatTxn = useCallback(async () => {
 		const { data, total } = await makeGetReq(
 			`v1/fiat/query-fiat-transaction?type=INR_WITHDRAWAL&size=${paginationModal.pageSize}&start=${
@@ -652,6 +662,7 @@ export default function WithDraw() {
 
 	useEffect(() => {
 		fetchUserRole();
+		fetchUserAction();
 	}, [fetchUserRole]);
 
 	useEffect(() => {
