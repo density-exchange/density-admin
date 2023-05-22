@@ -325,7 +325,7 @@ export default function WithDraw() {
 						<Typography variant="Regular_14" sx={{ width: '100%', textOverflow: 'ellipsis', overflow: 'hidden' }}>
 							{`${params.row?.userName?.slice(0, 8)}...`}
 						</Typography>
-						<CopyButton copyText={params.row?.username} />
+						<CopyButton copyText={params.row?.userName} />
 					</Box>
 				);
 			},

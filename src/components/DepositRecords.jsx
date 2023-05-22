@@ -272,13 +272,33 @@ export default function DepositRecords() {
 			field: 'userName',
 			headerName: 'Username',
 			headerClassName: 'kyc-column-header',
-			width: 100,
+			width: 120,
+			renderCell: (params) => {
+				return (
+					<Box sx={{ display: 'flex', alignItems: 'center', justifyItems: 'center' }}>
+						<Typography variant="Regular_14" sx={{ width: '100%', textOverflow: 'ellipsis', overflow: 'hidden' }}>
+							{`${params.row?.userName?.slice(0, 8)}...`}
+						</Typography>
+						<CopyButton copyText={params.row?.userName} />
+					</Box>
+				);
+			},
 		},
 		{
 			field: 'email',
 			headerName: 'Email',
 			headerClassName: 'kyc-column-header',
 			width: 150,
+			renderCell: (params) => {
+				return (
+					<Box sx={{ display: 'flex', alignItems: 'center', justifyItems: 'center' }}>
+						<Typography variant="Regular_14" sx={{ width: '100%', textOverflow: 'ellipsis', overflow: 'hidden' }}>
+							{`${params.row?.email?.slice(0, 13)}...`}
+						</Typography>
+						<CopyButton copyText={params.row?.email} />
+					</Box>
+				);
+			},
 		},
 		{
 			field: 'phone',
@@ -327,7 +347,7 @@ export default function DepositRecords() {
 			field: 'viewDetails',
 			headerName: 'View Details',
 			headerClassName: 'kyc-column-header',
-			width: 150,
+			width: 120,
 			renderCell: (params) => {
 				return (
 					<>
@@ -340,6 +360,22 @@ export default function DepositRecords() {
 							Trxn History
 						</ViewButton>
 					</>
+				);
+			},
+		},
+		{
+			field: 'FiatTxnID',
+			headerName: 'Transaction ID',
+			headerClassName: 'kyc-column-header',
+			width: 150,
+			renderCell: (params) => {
+				return (
+					<Box sx={{ display: 'flex', alignItems: 'center', justifyItems: 'center' }}>
+						<Typography variant="Regular_14" sx={{ width: '100%', textOverflow: 'ellipsis', overflow: 'hidden' }}>
+							{`${params.row?.FiatTxnID?.slice(0, 10)}...`}
+						</Typography>
+						<CopyButton copyText={params.row?.FiatTxnID} />
+					</Box>
 				);
 			},
 		},
