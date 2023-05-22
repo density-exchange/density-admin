@@ -233,7 +233,6 @@ export default function KycUsers() {
 			headerName: 'Bank Details',
 			width: 150,
 			renderCell: (params) => {
-				// console.log(params.row.id);
 				return (
 					<>
 						<ShowButton
@@ -292,7 +291,6 @@ export default function KycUsers() {
 		},
 	];
 	const changePagination = (event) => {
-		// console.log(event);
 		setPaginationModal({ page: event.page, pageSize: event.pageSize });
 	};
 	const handleAlignment = async (event, newAlignment) => {
@@ -342,7 +340,6 @@ export default function KycUsers() {
 
 	const fetchBankDetailsByID = async (userID) => {
 		const { data } = await makeGetReq(`v1/bank-accounts?userID=${userID}`);
-		console.log(data);
 		setBankDetail(data);
 	};
 
@@ -357,7 +354,6 @@ export default function KycUsers() {
 				setErrorMessage(true);
 				setRemark('');
 			} else {
-				// console.log(action, userId, remark);
 				const { message } = await updateKYVStatus({
 					action,
 					userID: userId,
@@ -391,7 +387,7 @@ export default function KycUsers() {
 		<Box sx={{ backgroundColor: '#EFF6FF' }}>
 			{isMobile ? (
 				<Box>
-					<Box sx={{ p: 2,height: "400px", width: '100%' }}>
+					<Box sx={{ p: 2, height: '400px', width: '100%' }}>
 						<DataGrid
 							rows={[...userRows]}
 							columns={usersColumns}
@@ -442,7 +438,6 @@ export default function KycUsers() {
 										variant="contained"
 										fullWidth
 										onClick={() => {
-											// console.log(params);
 											navigate(`/kycData/${kyc.id}`, {
 												state: {
 													email: kyc?.row?.email,

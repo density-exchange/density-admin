@@ -59,9 +59,7 @@ export default function BasicTabs() {
 	};
 
 	const getStepStatus = (item) => {
-		// // console.log(item)
 		let val = userKycData?.steps && userKycData?.steps[item]?.status;
-		console.log(val);
 		if (!val) return <></>;
 		switch (val) {
 			case 'SUCCESS':

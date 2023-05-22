@@ -14,9 +14,9 @@ import {
 	ToggleButtonGroup,
 	Typography,
 	useMediaQuery,
-	Tooltip
+	Tooltip,
 } from '@mui/material';
-import ContentCopyIcon from "@mui/icons-material/ContentCopy";
+import ContentCopyIcon from '@mui/icons-material/ContentCopy';
 import CopyButton from './Common/CopyButton';
 import React, { useCallback, useEffect, useState } from 'react';
 import { makeGetReq, makePostReq } from '../utils/axiosHelper';
@@ -230,7 +230,6 @@ export default function WithDraw() {
 		pageSize: 5,
 	});
 
-
 	const [totalDepositLogRows, setTotalDepositLogRows] = useState(0);
 
 	const [fiatTraxns, setFiatTraxns] = useState([]);
@@ -242,10 +241,12 @@ export default function WithDraw() {
 		// setPaginationModal(paginationModal => ({ page: 1, pageSize : paginationModal.pageSize}))
 	};
 
+	const [isEditAllowed, setIsEditAllowed] = useState(false);
+
 	const [remark, setRemark] = useState('');
 	const [remarkModal, setRemarkModal] = useState(false);
 	const toggleRemarkModal = () => setRemarkModal(!remarkModal);
-	
+
 	const depositLogs = [
 		{
 			field: 'timestamp',
@@ -317,13 +318,33 @@ export default function WithDraw() {
 			field: 'userName',
 			headerName: 'Username',
 			headerClassName: 'kyc-column-header',
-			width: 100,
+			width: 120,
+			renderCell: (params) => {
+				return (
+					<Box sx={{ display: 'flex', alignItems: 'center', justifyItems: 'center' }}>
+						<Typography variant="Regular_14" sx={{ width: '100%', textOverflow: 'ellipsis', overflow: 'hidden' }}>
+							{`${params.row?.userName?.slice(0, 8)}...`}
+						</Typography>
+						<CopyButton copyText={params.row?.username} />
+					</Box>
+				);
+			},
 		},
 		{
 			field: 'email',
 			headerName: 'Email',
 			headerClassName: 'kyc-column-header',
 			width: 150,
+			renderCell: (params) => {
+				return (
+					<Box sx={{ display: 'flex', alignItems: 'center', justifyItems: 'center' }}>
+						<Typography variant="Regular_14" sx={{ width: '100%', textOverflow: 'ellipsis', overflow: 'hidden' }}>
+							{`${params.row?.email?.slice(0, 13)}...`}
+						</Typography>
+						<CopyButton copyText={params.row?.email} />
+					</Box>
+				);
+			},
 		},
 		{
 			field: 'phone',
@@ -339,28 +360,30 @@ export default function WithDraw() {
 			width: 100,
 			renderCell: (params) => {
 				return (
-					<Box sx={{ display: "flex", alignItems: "center", justifyItems: "center" }}>
-        		<Typography variant="Regular_14" sx={{ width: "100%", textOverflow: "ellipsis", overflow: "hidden" }}>
-						{`****${params.row?.bankAccNo?.slice(-4)}`}</Typography>
-        		<CopyButton copyText={params.row?.bankAccNo}/>
-      		</Box>
-				)
-			}
+					<Box sx={{ display: 'flex', alignItems: 'center', justifyItems: 'center' }}>
+						<Typography variant="Regular_14" sx={{ width: '100%', textOverflow: 'ellipsis', overflow: 'hidden' }}>
+							{`****${params.row?.bankAccNo?.slice(-4)}`}
+						</Typography>
+						<CopyButton copyText={params.row?.bankAccNo} />
+					</Box>
+				);
+			},
 		},
 		{
-			field: "ifsc",
-			headerName: "IFSC",
-			headerClassName: "kyc-column-header",
+			field: 'ifsc',
+			headerName: 'IFSC',
+			headerClassName: 'kyc-column-header',
 			width: 100,
 			renderCell: (params) => {
 				return (
-					<Box sx={{ display: "flex", alignItems: "center", justifyItems: "center" }}>
-        		<Typography variant="Regular_14" sx={{ width: "100%", textOverflow: "ellipsis", overflow: "hidden" }}>
-						{`****${params.row?.ifsc?.slice(-4)}`}</Typography>
-        		<CopyButton copyText={params.row?.ifsc}/>
-      		</Box>
-				)
-			}
+					<Box sx={{ display: 'flex', alignItems: 'center', justifyItems: 'center' }}>
+						<Typography variant="Regular_14" sx={{ width: '100%', textOverflow: 'ellipsis', overflow: 'hidden' }}>
+							{`****${params.row?.ifsc?.slice(-4)}`}
+						</Typography>
+						<CopyButton copyText={params.row?.ifsc} />
+					</Box>
+				);
+			},
 		},
 		{
 			field: 'withdrawAmount',
@@ -464,6 +487,10 @@ export default function WithDraw() {
 		},
 	];
 
+	const filteredWithdrawColumns = withdrawColumns.filter(
+		(column) => column.field !== 'approve' && column.field !== 'reject'
+	);
+
 	const transactionColumns = [
 		{
 			field: 'date',
@@ -498,7 +525,6 @@ export default function WithDraw() {
 	];
 
 	const changePagination = (event) => {
-		// console.log(event);
 		setPaginationModal({ page: event.page, pageSize: event.pageSize });
 	};
 
@@ -506,16 +532,26 @@ export default function WithDraw() {
 		setDepositPaginationModal({ page: event.page, pageSize: event.pageSize });
 	};
 
-	const fetchUserRole = useCallback(async () => {
-		if(!adminID) return;
-		const role = await makeGetReq(`v1/admin/${adminID}`);
-		// console.log('helllllasfd', role.IsSuperAdmin);
-	},[adminID]);
+	// const fetchUserRole = useCallback(async () => {
+	// 	if (!adminID) return;
+	// 	const role = await makeGetReq(`v1/admin/${adminID}`);
+	// 	setIsEditAllowed(role.IsSuperAdmin);
+	// }, [adminID]);
+
+	const fetchUserRole = useCallback(() => {
+		makeGetReq(`v1/admin/${adminID}`)
+			.then((role) => {
+				if (!isEditAllowed) setIsEditAllowed(role.IsSuperAdmin);
+			})
+			.catch((error) => {
+				// Handle the error here
+			});
+	});
 
 	const fetchUserAction = useCallback(() => {
 		makeGetReq(`v1/check-action?id=${adminID}&action=RewardUpdater`)
-			.then((role) => {
-				console.log('helllllasfd', role);
+			.then((action) => {
+				if (!isEditAllowed) setIsEditAllowed(action.isActionAllowed);
 			})
 			.catch((error) => {
 				// Handle the error here
@@ -539,11 +575,11 @@ export default function WithDraw() {
 			date: new Date(traxn.createdAt).toLocaleDateString(),
 			time: new Date(traxn.createdAt).toLocaleTimeString(),
 			FiatTxnID: traxn.txnID,
-			RefID: traxn.txnRefID !== "" ? traxn.txnRefID : "--",
+			RefID: traxn.txnRefID !== '' ? traxn.txnRefID : '--',
 			redactedRefID: redactString(traxn.txnRefID),
 			UserID: traxn.userID,
 			TraxnType: traxn.fiatTransactionType,
-			ifsc: traxn?.IFSC
+			ifsc: traxn?.IFSC,
 		}));
 
 		setFiatTraxns(rows);
@@ -566,7 +602,7 @@ export default function WithDraw() {
 			date: new Date(traxn.createdAt).toLocaleDateString(),
 			time: new Date(traxn.createdAt).toLocaleTimeString(),
 			FiatTxnID: traxn.txnID,
-			RefID: traxn.txnRefID !== "" ? traxn.txnRefID : "--",
+			RefID: traxn.txnRefID !== '' ? traxn.txnRefID : '--',
 			redactedRefID: redactString(traxn.txnRefID),
 			UserID: traxn.userID,
 			TraxnType: traxn.fiatTransactionType,
@@ -618,7 +654,7 @@ export default function WithDraw() {
 	}, [mobileLogPaginationModal.page, mobileLogPaginationModal.pageSize]);
 
 	const getFiatTraxnByIdMobile = useCallback(async () => {
-		if(!fiatTraxnUserID) return;
+		if (!fiatTraxnUserID) return;
 		const { data, total, pageID, nextPageID } = await makeGetReq(
 			`v1/fiat/query-fiat-transaction?userID=${fiatTraxnUserID}&type=INR_WITHDRAWAL&size=${
 				mobileFiatTraxnByIdModal.pageSize
@@ -632,7 +668,7 @@ export default function WithDraw() {
 			time: new Date(traxn.createdAt).toLocaleTimeString(),
 			withdrawlAmount: Math.abs(traxn.amount),
 			withdrawlStatus: traxn.fiatTransactionStatus,
-			RefID: traxn.txnRefID !== "" ? traxn.txnRefID : "--",
+			RefID: traxn.txnRefID !== '' ? traxn.txnRefID : '--',
 		}));
 		setTraxnHistoryAccordionRows(rows);
 		setTotalTraxnHistory(total);
@@ -640,9 +676,8 @@ export default function WithDraw() {
 		setTraxnHistoryNextPageID(nextPageID);
 	}, [mobileFiatTraxnByIdModal.page, mobileFiatTraxnByIdModal.pageSize, fiatTraxnUserID]);
 
-
 	const getFiatTraxnById = async (userId) => {
-		if(!userId) return;
+		if (!userId) return;
 		const { data } = await makeGetReq(`v1/fiat/query-fiat-transaction?userID=${userId}&type=INR_WITHDRAWAL`);
 		const rows = data.map((traxn) => ({
 			id: traxn.id,
@@ -651,8 +686,8 @@ export default function WithDraw() {
 			date: new Date(traxn.createdAt).toLocaleDateString(),
 			time: new Date(traxn.createdAt).toLocaleTimeString(),
 			withdrawlAmount: Math.abs(traxn.amount),
-			RefID: traxn.txnRefID ?  traxn.txnRefID :   "--",
-			withdrawlStatus: traxn?.fiatTransactionStatus
+			RefID: traxn.txnRefID ? traxn.txnRefID : '--',
+			withdrawlStatus: traxn?.fiatTransactionStatus,
 		}));
 		setFiatTraxnHistoryRows(rows);
 	};
@@ -680,8 +715,7 @@ export default function WithDraw() {
 			toggleRemarkModal();
 			setRemark('');
 			setTxnRefId('');
-			// console.log(err.response?.data.ErrorMessage);
-			setMessage("Request failed. Check Ref. ID");
+			setMessage('Request failed. Check Ref. ID');
 
 			await fetchAllFiatTxn();
 			await fetchAllFiatTxnMobile();
@@ -762,7 +796,7 @@ export default function WithDraw() {
 
 			{isMobile ? (
 				<>
-					<Box sx={{ height: "400px", width: '100%' }}>
+					<Box sx={{ height: '400px', width: '100%' }}>
 						<DataGrid
 							sx={{
 								'.MuiDataGrid-columnHeaderCheckbox': {
@@ -781,7 +815,7 @@ export default function WithDraw() {
 								boxShadow: 5,
 							}}
 							rows={fiatTraxns}
-							columns={withdrawColumns}
+							columns={isEditAllowed ? withdrawColumns : filteredWithdrawColumns}
 							paginationModel={paginationModal}
 							rowCount={totalRows}
 							pageSizeOptions={[5, 10]}
@@ -796,7 +830,7 @@ export default function WithDraw() {
 						<Typography variant="h2">Withdraw Logs</Typography>
 					</Box>
 					<Box display="flex" justifyContent="center">
-						<Box sx={{ height: "400px", width: '100%' }}>
+						<Box sx={{ height: '400px', width: '100%' }}>
 							<DataGrid
 								sx={{
 									'.MuiDataGrid-columnHeaderCheckbox': {
@@ -1001,7 +1035,7 @@ export default function WithDraw() {
 								'& .MuiDataGrid-cellCheckbox': {
 									display: 'none',
 								},
-								height: "400px"
+								height: '400px',
 							}}
 							rows={fiatTraxnHistoryRows}
 							columns={transactionColumns}

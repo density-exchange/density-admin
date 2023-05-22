@@ -29,14 +29,11 @@ export default function Navbar() {
 
 	const { userId: adminID } = useSessionContext();
 
-	// console.log('lasdfljs', adminID);
-
 	const getCurrentUser = useCallback(async () => {
-		if(!adminID) return;
+		if (!adminID) return;
 		const currentUser = await makeGetReq(`/v1/admin/${adminID}`);
-		console.log('ladsfjakl', currentUser);
 		dispatch(getCurrentUserInfo(currentUser));
-	},[adminID]);
+	}, [adminID]);
 
 	useEffect(() => {
 		getCurrentUser();
