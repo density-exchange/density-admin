@@ -37,7 +37,8 @@ const RoleTile = styled(Typography)(({ theme }) => ({
 
 const RevokeButtonRoleTile = styled(Box)(({ theme }) => ({
 	textAlign: 'center',
-	backgroundColor: 'lightgreen',
+	padding: '10px',
+	fontWeigth: '800',
 }));
 
 const EditButton = styled(Button)(({ theme }) => ({
@@ -129,7 +130,6 @@ export default function AdminUsersTable() {
 	const toggleEditRoleModal = () => setEditRoleModal(!editRoleModal);
 
 	const currentUser = useSelector((state) => state.currentUser.currentUserInfo);
-	console.log('alsdfjl', currentUser.IsSuperAdmin);
 
 	const SuperAdminColumns = [
 		{
@@ -291,7 +291,6 @@ export default function AdminUsersTable() {
 			adminID: adminId,
 			roles,
 		});
-		// console.log(data);
 	};
 
 	const makePermissionPostReq = async () => {
@@ -323,17 +322,15 @@ export default function AdminUsersTable() {
 		superAdmin: admin.IsSuperAdmin,
 		role: admin.Roles,
 	}));
-	const getStyles = (paramID, containerArray) =>  {
-		console.log("role Id", paramID);
+	const getStyles = (paramID, containerArray) => {
 		const isSelected = containerArray.indexOf(paramID) === -1;
-		if(isSelected) return {};
+		if (isSelected) return {};
 		return {
-			fontWeight: "500",
-			backgroundColor: "#0288D1",
-			color: "#fff"
+			fontWeight: '500',
+			backgroundColor: '#0288D1',
+			color: '#fff',
 		};
-	}
-	console.log("permissions", permissionsToRole);
+	};
 	useEffect(() => {
 		getAllAdmins();
 		// getRolesPermissions();
@@ -542,7 +539,6 @@ export default function AdminUsersTable() {
 								<MenuItem value="RewardUpdater">RewardUpdater</MenuItem>
 								<MenuItem value="AppVersionUpdater">AppVersionUpdater</MenuItem>
 								<MenuItem value="FiatViewer">FiatViewer</MenuItem>
-
 							</Select>
 						</FormControl>
 					</Box>
@@ -596,7 +592,7 @@ export default function AdminUsersTable() {
 							<InputLabel>Roles</InputLabel>
 							<Select multiple value={rolesToAdmin} onChange={(e) => setRolesToAdmin(e.target.value)}>
 								{createdRoles?.map((role) => (
-									<MenuItem key={role.ID} value={role.ID} style={getStyles(role.ID, rolesToAdmin)} >
+									<MenuItem key={role.ID} value={role.ID} style={getStyles(role.ID, rolesToAdmin)}>
 										{role.Role}
 									</MenuItem>
 								))}
@@ -633,7 +629,7 @@ export default function AdminUsersTable() {
 							<RevokeRoleButton
 								sx={
 									selectedRoleForRevoke.find((roleId) => roleId === r.ID)
-										? { border: '2px solid red', backgroundColor: 'red' }
+										? { border: '1px solid grey', backgroundColor: 'grey', opacity: '0.5' }
 										: {}
 								}
 								key={idx}
@@ -644,7 +640,6 @@ export default function AdminUsersTable() {
 								<IconButton
 									size="small"
 									sx={{
-										backgroundColor: 'lightgreen',
 										borderRadius: '4px',
 									}}
 									onClick={() =>
