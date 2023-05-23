@@ -367,12 +367,12 @@ export default function DepositRecords() {
 			field: 'FiatTxnID',
 			headerName: 'Transaction ID',
 			headerClassName: 'kyc-column-header',
-			width: 150,
+			width: 120,
 			renderCell: (params) => {
 				return (
 					<Box sx={{ display: 'flex', alignItems: 'center', justifyItems: 'center' }}>
 						<Typography variant="Regular_14" sx={{ width: '100%', textOverflow: 'ellipsis', overflow: 'hidden' }}>
-							{`${params.row?.FiatTxnID?.slice(0, 10)}...`}
+							{`***${params.row?.FiatTxnID?.slice(-5)}`}
 						</Typography>
 						<CopyButton copyText={params.row?.FiatTxnID} />
 					</Box>

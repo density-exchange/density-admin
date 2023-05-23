@@ -28,6 +28,7 @@ import { makeDeleteReq, makeGetReq, makePatchReq, makePostReq } from '../utils/a
 import { addAllAdmins } from '../redux/allAdmins/allAdmins.slice';
 import ConfirmationModal from './ConfirmationModal';
 import InfoModal from './InfoModal';
+import EditRolePermModal from './Modals/EditRolePermModal';
 
 const RoleTile = styled(Typography)(({ theme }) => ({
 	textAlign: 'center',
@@ -128,6 +129,8 @@ export default function AdminUsersTable() {
 	const toggleInfoModal = () => setInfoModal(!infoModal);
 	const toggleAssignRoleModal = () => setAssignRoleModal(!assignRoleModal);
 	const toggleEditRoleModal = () => setEditRoleModal(!editRoleModal);
+
+	const [showEditRolePermModal, setShowEditRolePermModal] = useState(false);
 
 	const currentUser = useSelector((state) => state.currentUser.currentUserInfo);
 
@@ -366,6 +369,9 @@ export default function AdminUsersTable() {
 					</Button> */}
 					<Button variant="contained" onClick={toggleAddRoleModal}>
 						Create a role
+					</Button>
+					<Button variant="contained" onClick={() => setShowEditRolePermModal(true)}>
+						Edit a role
 					</Button>
 				</Box>
 				{isMobile ? (
@@ -672,6 +678,13 @@ export default function AdminUsersTable() {
 					</Box>
 				</Box>
 			</Modal>
+
+			<EditRolePermModal
+				isOpen={showEditRolePermModal}
+				close={() => setShowEditRolePermModal(false)}
+				primaryAction={() => console.log('hello world')}
+				secondaryAction={() => setShowEditRolePermModal(false)}
+			/>
 		</Box>
 	);
 }
